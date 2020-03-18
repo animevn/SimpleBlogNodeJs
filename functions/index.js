@@ -55,11 +55,58 @@ async function isSignIn(req){
   .then(()=>{return true;}).catch(()=>{return false;});
 }
 
+//Routing navigation parts
+app.get("/", (req, res)=>{
+  const posts = [];
+  db.collectionGroup("blogs").get().then(snapshot=>{
+    snapshot.forEach(doc=> posts.push(doc.data()));
+  }).then(async ()=>{
+    res.render("index", {homeActive:"active", aboutActive:"", contactActive:"",
+    posts:posts, isSignIn: await isSignIn(req)});
+  }).catch(err=>console.log(err));
+});
+
+app.get("/contact", async (req, res)=>{
+  res.render("contact",
+    {homeActive:"", aboutActive:"", contactActive:"active", isSignIn: await isSignIn(req)});
+});
+
+app.get("/about", async (req, res)=>{
+  res.render("contact",
+    {homeActive:"", aboutActive:"active", contactActive:"", isSignIn: await isSignIn(req)});
+});
+
+app.get("/login", async (req, res)=>{
+  res.render("login",
+    {homeActive:"", aboutActive:"", contactActive:"", isSignIn: await isSignIn(req)});
+});
+
+//auth parts
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//routing all error 404 to homepage
+app.get("**", (req, res)=>{
+  res.status(404).redirect("/");
+});
+
+exports.app = functions.https.onRequest(app);
 
 
 
