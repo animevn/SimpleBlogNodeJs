@@ -30,7 +30,7 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
 
-function setCookie(res, user) {
+function setCookie(res, user, endpoint) {
   user.getIdToken().then(idToken=>{
     //cookie expires in one day
     const timeOut = 60 * 60 * 24 * 1000;
@@ -44,12 +44,16 @@ function setCookie(res, user) {
       const options = {maxAge:timeOut, httpOnly:true, secure:false};
       //cookie name must be __session to use with firebase admin
       res.cookie("__session", sessionCookie, options);
-      res.redirect("/");
-      res.end();
+      res.redirect(endpoint);
     }).catch(()=>res.status(401).send("UNAUTHORISED REQUEST"));
   })
 }
 
+async function isSignIn(req){
+  const sessionCookie = req.cookies.__session || "";
+  return await admin.auth().verifySessionCookie(sessionCookie, true)
+  .then(()=>{return true;}).catch(()=>{return false;});
+}
 
 
 
