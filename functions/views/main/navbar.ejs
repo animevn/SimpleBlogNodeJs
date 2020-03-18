@@ -1,0 +1,55 @@
+<div class="container-fluid bg-warning shadow px-0">
+  <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light py-4 px-0">
+      <button class="btn navbar-toggler navbar-button" data-toggle="collapse"
+              data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="row navbar-header">
+        <a class="navbar-brand brand-title" href="/">
+          <div class="brand-text text-center">BLOG WORLD</div>
+        </a>
+
+        <% if (isSignIn){ %>
+        <div class="dropdown">
+          <a class="navbar-brand brand-image dropdown-toggle" id="dropdownMenuLink"
+             data-toggle="dropdown">
+            <img class="dropdown-toggle profile-image"
+                 src="/images/user-check.svg" alt="user-login">
+          </a>
+          <div class="dropdown-menu dropdown-menu-right bg-warning">
+            <a class="dropdown-item" href="/deleteuser">Delete Account</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/">Profile</a>
+            <a class="dropdown-item" href="/">Your posts</a>
+            <a class="dropdown-item" href="/">Recycle Bin</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/logout">Logout</a>
+          </div>
+        </div>
+
+        <% } else { %>
+          <a class="navbar-brand brand-image" href="/login">
+            <img class="profile-image" src="/images/user-circle.svg" alt="user-not-login">
+          </a>
+        <% } %>
+      </div>
+
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item <%= homeActive%>">
+            <a class="nav-link font-weight-bold" href="/">HOME</a>
+          </li>
+          <li class="nav-item <%= aboutActive%>">
+            <a class="nav-link font-weight-bold" href="/about">ABOUT US</a>
+          </li>
+          <li class="nav-item <%= contactActive%>">
+            <a class="nav-link font-weight-bold" href="/contact">CONTACT US</a>
+          </li>
+        </ul>
+      </div>
+
+    </nav>
+  </div>
+</div>

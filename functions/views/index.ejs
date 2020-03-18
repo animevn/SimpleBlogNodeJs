@@ -1,0 +1,27 @@
+<%- include("main/header") -%>
+
+<div class="container-fluid px-0">
+  <%- include("main/navbar") -%>
+
+  <% if (isSignIn) {%>
+  <div class="container pt-1">
+    <a class="btn btn-warning btn-lg float-right text-dark shadow" href="/addpost">
+      Add post
+    </a>
+  </div>
+  <% } %>
+  <%- include("main/home") -%>
+
+  <% posts.forEach(post => { %>
+    <div class="container">
+      <h2><%= post.title %></h2>
+      <p class="text-justify my-3">
+        <%= post.body.substring(0, 100) + " ..." %>
+        <a class="text-link" href="/<%= post.url %>">Read more</a>
+      </p>
+    </div>
+  <% }); %>
+
+</div>
+
+<%- include("main/footer") -%>

@@ -1,0 +1,37 @@
+<%- include("main/header") -%>
+
+<div class="container-fluid px-0">
+  <%- include("main/navbar") -%>
+
+  <% if (isAuthor) {%>
+    <div class="container pt-1">
+      <div class="btn-group float-right shadow">
+        <form class="btn-group" method="post" action="/edit">
+          <button class="btn btn-group btn-success btn-lg"
+                  name="edit" type="submit" value=<%= id %>>
+            &nbsp; Edit &nbsp;
+          </button>
+        </form>
+
+        <form class="btn-group float-right" method="post" action="/delete">
+          <button class="btn btn-group btn-danger float-right btn-lg"
+                  name="delete" type="submit" value=<%= id %>>
+            Delete
+          </button>
+        </form>
+
+      </div>
+    </div>
+  <%}%>
+
+
+  <div class="container mt-1">
+    <h2 class="pt-4"><%= post.title %></h2>
+    <p class="text-justify my-3"> <%= post.body %> </p>
+  </div>
+
+
+  </div>
+</div>
+
+<%- include("main/footer") -%>
