@@ -132,10 +132,56 @@ app.get("/logout", (req, res)=>{
   }
 });
 
+//signin
+app.get("/signin", async (req, res)=>{
+  res.render("signin",
+    {homeActive:"", aboutActive:"", contactActive:"", isSignIn: await isSignIn(req)});
+});
 
+app.post("/signin", (req, res)=>{
+  const email = req.body.email;
+  const password = req.body.password;
+  firebase.auth().signInWithEmailAndPassword(email, password)
+  .then(result=> setCookie(res, result.user, "/"))
+  .catch(err=>{
+    console.log(err);
+    res.redirect("/");
+  });
+});
 
+//register
+app.get("/register", async (req, res)=>{
+  res.render("register",
+    {homeActive:"", aboutActive:"", contactActive:"", isSignIn: await isSignIn(req)});
+});
 
+app.post("/register", (req, res)=>{
+  const email = req.body.email;
+  const password = req.body.password;
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+  .then(result=> setCookie(res, result.user, "/"))
+  .catch(err=>{
+    console.log(err);
+    res.redirect("/");
+  });
+});
 
+//delete user
+app.get("/deleteuser", (req, res)=>{
+  const sessionCookie = req.cookies.__session || "";
+  res.clearCookie("__session");
+  if (sessionCookie){
+    admin.auth().verifySessionCookie(sessionCookie, true).then(result=>{
+      return admin.auth().revokeRefreshTokens(result.sub).then(()=>{
+        db.collection("blog").doc(result.uid).collection("blogs").get().then(snapshot=>{
+          snapshot.forEach(doc=> doc.ref.delete())
+        }).then(()=> admin.auth().deleteUser(result.sub));
+      }).then(()=> res.redirect("/")).catch(()=>res.redirect("/"));
+    });
+  }else {
+    res.redirect("/");
+  }
+});
 
 
 
