@@ -120,6 +120,17 @@ app.get("/auth/google/callback", (req, res)=>{
 });
 
 //logout
+app.get("/logout", (req, res)=>{
+  const sessionCookie = req.cookies.__session || "";
+  res.clearCookie("__session");
+  if (sessionCookie){
+    admin.auth().verifySessionCookie(sessionCookie, true).then(result=>{
+      return admin.auth().revokeRefreshTokens(result.sub);
+    }).then(()=> res.redirect("/")).catch(()=> res.redirect("/"));
+  }else {
+    res.redirect("/");
+  }
+});
 
 
 
