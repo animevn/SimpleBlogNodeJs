@@ -42,7 +42,7 @@ function setCookie(res, user, endpoint) {
       throw new Error("Sign in again after 60 minutes");
     }).then(sessionCookie=>{
       const options = {maxAge:timeOut, httpOnly:true, secure:false};
-      //cookie name must be __session to use with firebase admin
+      //cookie name must be named __session to use with firebase admin
       res.cookie("__session", sessionCookie, options);
       res.redirect(endpoint);
     }).catch(()=>res.status(401).send("UNAUTHORISED REQUEST"));
@@ -55,7 +55,9 @@ async function isSignIn(req){
   .then(()=>{return true;}).catch(()=>{return false;});
 }
 
+///////////////////////////
 //Routing navigation parts
+
 app.get("/", (req, res)=>{
   const posts = [];
   db.collectionGroup("blogs").get().then(snapshot=>{
@@ -81,7 +83,45 @@ app.get("/login", async (req, res)=>{
     {homeActive:"", aboutActive:"", contactActive:"", isSignIn: await isSignIn(req)});
 });
 
+///////////////////////////
 //auth parts
+
+//google login
+app.get("/google-auth", (req, res)=>{
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type:"offline",
+    //userinfo.email and userinfo.profile are minimum needed to access user profile
+    scope: ["https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"]
+  });
+  res.redirect(authUrl);
+});
+
+//process redirects from google, /auth/google/callback is defined in google api credential, and
+//can be changed to other name
+app.get("/auth/google/callback", (req, res)=>{
+  const code = req.query;
+  if (code){
+    oAuth2Client.getToken(code, (err, token)=>{
+      if (err){
+        console.log(err);
+        res.redirect("/");
+      }else {
+        let credential = firebase.auth.GoogleAuthProvider.credential(token.id_token);
+        firebase.auth().signInWithCredential(credential)
+        .then(result=> setCookie(res, result.user, "/"))
+        .catch(err=>{
+          console.log(err);
+          res.redirect("/");
+        })
+      }
+    });
+  }
+});
+
+//logout
+
+
 
 
 
