@@ -55,6 +55,14 @@ async function isSignIn(req){
   .then(()=>{return true;}).catch(()=>{return false;});
 }
 
+async function checkAuthor(req, author){
+  const sessionCookie = req.cookies.__session || "";
+  return await admin.auth().verifySessionCookie(sessionCookie, true)
+  .then(result=>{
+    return {signIn: true, author: result.uid === author};
+  }).catch(()=>{return {signIn:false, author:false};});
+}
+
 ///////////////////////////
 //Routing navigation parts
 
@@ -216,7 +224,22 @@ app.post("/addpost", (req, res)=>{
   });
 })
 
-
+//Read
+app.get("/:url", (req, res)=>{
+  const url = req.params.url.toLowerCase();
+  const posts = [];
+  db.collectionGroup("blogs").where("url", "==", url).get().then(async snapshot=>{
+    await snapshot.forEach(doc=>posts.push({data:doc.data(), id:doc.id}));
+    if (posts.length > 0){
+      let post = posts[0];
+      const check = await checkAuthor(req, post.data.author);
+      res.render("post",
+        {homeActive: "", aboutActive:"", contactActive:"", post: post.data, id: post.id,
+          isSignIn:check.signIn,
+          isAuthor:check.author});
+    }
+  });
+});
 
 
 
