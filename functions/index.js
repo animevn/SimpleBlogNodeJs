@@ -183,7 +183,38 @@ app.get("/deleteuser", (req, res)=>{
   }
 });
 
+//CRUDE part
 
+//create
+app.get("/addpost", async (req, res)=>{
+  if (await isSignIn(req)){
+    res.render("addpost",
+      {homeActive: "", aboutActive:"", contactActive:"", isSignIn: true});
+  }else {
+    res.redirect("/");
+  }
+})
+
+app.post("/addpost", (req, res)=>{
+  const title = req.body.post_title;
+  const body = req.body.post_body;
+  const url = title.replace(/\s/g, "-").toLowerCase();
+  const sessionCookie = req.cookies.__session || "";
+  admin.auth().verifySessionCookie(sessionCookie, true)
+  .then(result=>{
+    const post = {
+      title:title,
+      url:url,
+      body:body,
+      author:result.uid
+    };
+    db.collection("blog").doc(result.uid.toString()).collection("blogs").doc().set(post)
+    .then(()=>res.redirect("/")).catch(err=>console.log(err));
+  }).catch(err=>{
+    console.log(err);
+    res.redirect("/");
+  });
+})
 
 
 
