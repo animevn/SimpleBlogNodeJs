@@ -35,11 +35,11 @@ function setCookie(res, user, endpoint) {
     //cookie expires in one day
     const timeOut = 60 * 60 * 24 * 1000;
     admin.auth().verifyIdToken(idToken).then(result=>{
-      //force user to re-signin after 60 minutes
-      if (new Date().getTime()/1000 - result.auth_time < 60 * 60){
+      //if time from result is more than 5 minutes then redirect to home
+      if (new Date().getTime()/1000 - result.auth_time < 5 * 60){
         return admin.auth().createSessionCookie(idToken, {expiresIn:timeOut})
       }
-      throw new Error("Sign in again after 60 minutes");
+      throw new Error("UNAUTHORISED REQUEST");
     }).then(sessionCookie=>{
       const options = {maxAge:timeOut, httpOnly:true, secure:false};
       //cookie name must be named __session to use with firebase admin
@@ -201,7 +201,7 @@ app.get("/addpost", async (req, res)=>{
   }else {
     res.redirect("/");
   }
-})
+});
 
 app.post("/addpost", (req, res)=>{
   const title = req.body.post_title;
@@ -222,7 +222,7 @@ app.post("/addpost", (req, res)=>{
     console.log(err);
     res.redirect("/");
   });
-})
+});
 
 //Read
 app.get("/:url", (req, res)=>{
@@ -235,22 +235,44 @@ app.get("/:url", (req, res)=>{
       const check = await checkAuthor(req, post.data.author);
       res.render("post",
         {homeActive: "", aboutActive:"", contactActive:"", post: post.data, id: post.id,
-          isSignIn:check.signIn,
-          isAuthor:check.author});
+          isSignIn:check.signIn, isAuthor:check.author});
     }
   });
 });
 
+//Update
+app.post("/edit", (req, res)=>{
+  const edit = req.body.edit;
+  const sessionCookie = req.cookies.__session || "";
+  admin.auth().verifySessionCookie(sessionCookie, true).then(result=>{
+    db.collection("blog").doc(result.uid).collection("blogs").doc(edit).get().then(async doc=>{
+      res.render("edit",
+        {homeActive: "", aboutActive:"", contactActive:"",
+          post: doc.data(), id: doc.id, isSignIn: await isSignIn(req)})
+    });
+  });
+});
 
+app.post("/updatepost", (req, res)=>{
+  const update = req.body.update;
+  const body = req.body.post_body;
+  const title = req.body.post_title;
+  const sessionCookie = req.cookies.__session || "";
+  admin.auth().verifySessionCookie(sessionCookie, true).then(result=>{
+    db.collection("blog").doc(result.uid).collection("blogs").doc(update)
+    .update({title:title, body:body}).then(()=>res.redirect("/")).catch(err=>console.log(err))
+  }).catch(()=>res.redirect("/"));
+});
 
-
-
-
-
-
-
-
-
+//Delete
+app.post("/delete", (req, res)=>{
+  const del_post = req.body.delete;
+  const sessionCookie = req.cookies.__session || "";
+  admin.auth().verifySessionCookie(sessionCookie, true).then(result=>{
+    db.collection("blog").doc(result.uid).collection("blogs").doc(del_post)
+    .delete().then(()=>res.redirect("/")).catch(err=>console.log(err))
+  }).catch(()=>res.redirect("/"));
+});
 
 //routing all error 404 to homepage
 app.get("**", (req, res)=>{
