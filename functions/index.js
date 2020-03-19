@@ -21,7 +21,7 @@ firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
 const googleApiKey = require("./googleApiKey");
 const CLIENT_ID = googleApiKey.web.client_id;
 const CLIENT_SECRET = googleApiKey.web.client_secret;
-const REDIRECT_URL = googleApiKey.web.redirect_uris[0];
+const REDIRECT_URL = googleApiKey.web.redirect_uris[1];
 const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 
 const app = express();
@@ -41,7 +41,7 @@ function setCookie(res, user, endpoint) {
       }
       throw new Error("UNAUTHORISED REQUEST");
     }).then(sessionCookie=>{
-      const options = {maxAge:timeOut, httpOnly:true, secure:false};
+      const options = {maxAge:timeOut, httpOnly:true, secure:true};
       //cookie name must be named __session to use with firebase admin
       res.cookie("__session", sessionCookie, options);
       res.redirect(endpoint);
